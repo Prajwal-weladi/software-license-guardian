@@ -1,4 +1,3 @@
-
 import { License } from "@/data/mockData";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -7,6 +6,7 @@ import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { formatCurrency, formatDate, calculateDaysRemaining } from "@/lib/utils";
 import { X, Calendar, Users, Book, Edit, FileText, Archive } from "lucide-react";
+import LicenseEmailNotification from './LicenseEmailNotification';
 
 interface LicenseDetailsPanelProps {
   license: License | null;
@@ -61,7 +61,7 @@ const LicenseDetailsPanel = ({ license, onClose }: LicenseDetailsPanelProps) => 
           <TabsList className="w-full grid grid-cols-3 rounded-none">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="usage">Usage</TabsTrigger>
-            <TabsTrigger value="documents">Documents</TabsTrigger>
+            <TabsTrigger value="notifications">Notifications</TabsTrigger>
           </TabsList>
           
           <TabsContent value="overview" className="p-4 space-y-6">
@@ -173,24 +173,8 @@ const LicenseDetailsPanel = ({ license, onClose }: LicenseDetailsPanelProps) => 
             </div>
           </TabsContent>
           
-          <TabsContent value="documents" className="p-4 space-y-4">
-            <div className="flex items-center gap-3">
-              <Book className="h-4 w-4 text-muted-foreground" />
-              <div>
-                <p className="text-sm font-medium">License Agreement</p>
-                <p className="text-xs text-muted-foreground">
-                  Last updated on {formatDate(license.startDate)}
-                </p>
-              </div>
-            </div>
-            
-            <div className="bg-muted/30 rounded-md p-4 text-center">
-              <FileText className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
-              <p className="text-sm">License documentation will be displayed here</p>
-              <p className="text-xs text-muted-foreground mt-1">
-                Upload license agreements and related documents
-              </p>
-            </div>
+          <TabsContent value="notifications" className="p-4">
+            <LicenseEmailNotification licenseId={license.id} />
           </TabsContent>
         </Tabs>
       </CardContent>
