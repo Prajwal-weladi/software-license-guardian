@@ -1,6 +1,6 @@
-
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { Resend } from "npm:resend@2.0.0";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -18,7 +18,31 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_ANON_KEY') ?? ''
     )
 
-    // Get licenses expiring in 5 days
+    const resend = new Resend(Deno.env.get('RESEND_API_KEY'));
+
+    const body = await req.json();
+
+    if (body.testEmail) {
+      const testEmailResponse = await resend.emails.send({
+        from: 'notifications@yourdomain.com',
+        to: 'test@example.com',
+        subject: 'Test Email from License Management System',
+        html: `
+          <h1>Email Service Test</h1>
+          <p>This is a test email from your License Management System.</p>
+          <p>If you're seeing this, your email configuration is working correctly!</p>
+        `
+      });
+
+      return new Response(
+        JSON.stringify({ message: 'Test email sent successfully', response: testEmailResponse }),
+        {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 200,
+        }
+      );
+    }
+
     const fiveDaysFromNow = new Date()
     fiveDaysFromNow.setDate(fiveDaysFromNow.getDate() + 5)
     
@@ -34,12 +58,9 @@ serve(async (req) => {
 
     if (licensesError) throw licensesError
 
-    // Send emails for each expiring license
     for (const license of expiringLicenses) {
       if (license.license_notifications) {
         for (const notification of license.license_notifications) {
-          // Send email using your preferred email service
-          // Example using Resend (you'll need to set up the email service in Supabase)
           await fetch('https://api.resend.com/emails', {
             method: 'POST',
             headers: {
@@ -67,13 +88,14 @@ serve(async (req) => {
     }
 
     return new Response(
-      JSON.stringify({ message: 'Expiring license notifications sent successfully' }),
+      JSON.stringify({ message: 'Expiring license notifications processed' }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 200,
       }
     )
   } catch (error) {
+    console.error('Error in check-expiring-licenses function:', error);
     return new Response(
       JSON.stringify({ error: error.message }),
       {

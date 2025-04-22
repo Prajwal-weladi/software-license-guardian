@@ -1,7 +1,11 @@
+import { useState } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
+import { Send } from 'lucide-react';
 import { License } from "@/data/mockData";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { formatCurrency, formatDate, calculateDaysRemaining } from "@/lib/utils";
@@ -42,6 +46,39 @@ const LicenseDetailsPanel = ({ license, onClose }: LicenseDetailsPanelProps) => 
         return 'Expired';
       default:
         return status;
+    }
+  };
+
+  const [isSending, setIsSending] = useState(false);
+  const { toast } = useToast();
+
+  const handleTestEmail = async () => {
+    if (!license) return;
+
+    setIsSending(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('check-expiring-licenses', {
+        body: JSON.stringify({
+          testEmail: true,
+          licenseId: license.id
+        })
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Email Test Successful",
+        description: "A test email has been sent successfully.",
+      });
+    } catch (error) {
+      console.error('Email test failed:', error);
+      toast({
+        variant: "destructive",
+        title: "Email Test Failed",
+        description: "Unable to send test email. Please check your configuration.",
+      });
+    } finally {
+      setIsSending(false);
     }
   };
 
@@ -181,6 +218,15 @@ const LicenseDetailsPanel = ({ license, onClose }: LicenseDetailsPanelProps) => 
       
       <CardFooter className="border-t p-4 flex justify-between">
         <div className="flex gap-2">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={handleTestEmail}
+            disabled={isSending}
+          >
+            <Send className="mr-2 h-4 w-4" />
+            {isSending ? 'Sending...' : 'Test Email'}
+          </Button>
           <Button variant="outline" size="sm">
             <Archive className="mr-2 h-4 w-4" />
             Archive
