@@ -1,6 +1,7 @@
 
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { licenses } from "@/data/mockData";
 import { 
   Dialog, 
   DialogContent, 
@@ -63,12 +64,29 @@ const AddLicenseDialog = ({ open, onOpenChange }: AddLicenseDialogProps) => {
       return;
     }
     
-    // Here you would normally add the license to your database
-    console.log("Adding license:", formData);
+    // Create new license object
+    const newLicense = {
+      id: `license-${Date.now()}`,
+      name: formData.name,
+      vendor: formData.vendor,
+      type: formData.type,
+      seats: parseInt(formData.seats),
+      usedSeats: 0, // New licenses start with 0 used seats
+      department: formData.department,
+      cost: formData.cost ? parseFloat(formData.cost) : 0,
+      purchaseDate: formData.startDate || new Date().toISOString().split('T')[0],
+      expiryDate: formData.expiryDate || new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+      status: 'active',
+      notes: formData.notes || null,
+      assignedUsers: []
+    };
+    
+    // Add to the licenses array
+    licenses.unshift(newLicense);
     
     toast({
       title: "License added",
-      description: "The license has been successfully added"
+      description: "The license has been successfully added to inventory"
     });
     
     // Reset form and close dialog

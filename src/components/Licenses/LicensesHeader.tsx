@@ -4,8 +4,20 @@ import { Plus, Download } from "lucide-react";
 import { useState } from "react";
 import AddLicenseDialog from "./AddLicenseDialog";
 
-const LicensesHeader = () => {
+interface LicensesHeaderProps {
+  onLicenseAdded?: () => void;
+}
+
+const LicensesHeader = ({ onLicenseAdded }: LicensesHeaderProps) => {
   const [showAddDialog, setShowAddDialog] = useState(false);
+
+  const handleDialogOpenChange = (open: boolean) => {
+    setShowAddDialog(open);
+    if (!open && onLicenseAdded) {
+      // If dialog is being closed, trigger the license refresh
+      onLicenseAdded();
+    }
+  };
 
   return (
     <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6">
@@ -29,7 +41,7 @@ const LicensesHeader = () => {
       
       <AddLicenseDialog 
         open={showAddDialog} 
-        onOpenChange={setShowAddDialog} 
+        onOpenChange={handleDialogOpenChange} 
       />
     </div>
   );

@@ -135,7 +135,7 @@ const LicensesTable = ({ onSelectLicense }: LicensesTableProps) => {
                         >
                           <Info className="h-4 w-4" />
                         </Button>
-                        {license.documentUrl && (
+                        {license.notes && (
                           <Button variant="ghost" size="icon">
                             <FileText className="h-4 w-4" />
                           </Button>
