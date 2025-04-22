@@ -33,7 +33,7 @@ const AddLicenseDialog = ({ open, onOpenChange }: AddLicenseDialogProps) => {
   const [formData, setFormData] = useState({
     name: "",
     vendor: "",
-    type: "subscription",
+    type: "Subscription",
     seats: "",
     department: "",
     cost: "",
@@ -64,21 +64,23 @@ const AddLicenseDialog = ({ open, onOpenChange }: AddLicenseDialogProps) => {
       return;
     }
     
+    // Get the license type in the correct format required by the License interface
+    const licenseType = formData.type as 'Subscription' | 'Perpetual' | 'User-based' | 'Device-based';
+    
     // Create new license object
     const newLicense = {
       id: `license-${Date.now()}`,
       name: formData.name,
       vendor: formData.vendor,
-      type: formData.type,
+      type: licenseType,
       seats: parseInt(formData.seats),
       usedSeats: 0, // New licenses start with 0 used seats
       department: formData.department,
       cost: formData.cost ? parseFloat(formData.cost) : 0,
-      purchaseDate: formData.startDate || new Date().toISOString().split('T')[0],
+      startDate: formData.startDate || new Date().toISOString().split('T')[0],
       expiryDate: formData.expiryDate || new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-      status: 'active',
-      notes: formData.notes || null,
-      assignedUsers: []
+      status: 'active' as 'active' | 'expiring' | 'expired',
+      tags: [], // Add empty tags array to match the License interface
     };
     
     // Add to the licenses array
@@ -93,7 +95,7 @@ const AddLicenseDialog = ({ open, onOpenChange }: AddLicenseDialogProps) => {
     setFormData({
       name: "",
       vendor: "",
-      type: "subscription",
+      type: "Subscription",
       seats: "",
       department: "",
       cost: "",
@@ -148,11 +150,10 @@ const AddLicenseDialog = ({ open, onOpenChange }: AddLicenseDialogProps) => {
                   <SelectValue placeholder="Select type" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="subscription">Subscription</SelectItem>
-                  <SelectItem value="perpetual">Perpetual</SelectItem>
-                  <SelectItem value="trial">Trial</SelectItem>
-                  <SelectItem value="floating">Floating</SelectItem>
-                  <SelectItem value="site">Site License</SelectItem>
+                  <SelectItem value="Subscription">Subscription</SelectItem>
+                  <SelectItem value="Perpetual">Perpetual</SelectItem>
+                  <SelectItem value="User-based">User-based</SelectItem>
+                  <SelectItem value="Device-based">Device-based</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -184,9 +185,10 @@ const AddLicenseDialog = ({ open, onOpenChange }: AddLicenseDialogProps) => {
                   <SelectItem value="Marketing">Marketing</SelectItem>
                   <SelectItem value="Sales">Sales</SelectItem>
                   <SelectItem value="Engineering">Engineering</SelectItem>
+                  <SelectItem value="Design">Design</SelectItem>
                   <SelectItem value="HR">HR</SelectItem>
                   <SelectItem value="Finance">Finance</SelectItem>
-                  <SelectItem value="Operations">Operations</SelectItem>
+                  <SelectItem value="All">All</SelectItem>
                 </SelectContent>
               </Select>
             </div>

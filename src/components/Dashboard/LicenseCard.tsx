@@ -90,7 +90,7 @@ const LicenseCard = ({ license }: LicenseCardProps) => {
       
       <CardFooter className="bg-muted/30 px-6 py-3 flex justify-between">
         <div className="flex space-x-1">
-          {license.tags.map((tag) => (
+          {license.tags && license.tags.map((tag) => (
             <Badge key={tag} variant="secondary" className="text-xs">
               {tag}
             </Badge>
