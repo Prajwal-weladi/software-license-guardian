@@ -20,6 +20,11 @@ const LicenseEmailNotification = ({ licenseId }: LicenseEmailNotificationProps) 
     setIsSubmitting(true);
     
     try {
+      // Check if Supabase is properly initialized
+      if (!supabase.from) {
+        throw new Error('Supabase client is not properly initialized');
+      }
+
       const { error } = await supabase
         .from('license_notifications')
         .insert([
@@ -36,10 +41,15 @@ const LicenseEmailNotification = ({ licenseId }: LicenseEmailNotificationProps) 
       setEmail('');
     } catch (error) {
       console.error('Error saving notification:', error);
+      
+      const errorMessage = import.meta.env.DEV 
+        ? "Supabase connection error. Check environment variables." 
+        : "Failed to save email notification settings";
+      
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Failed to save email notification settings",
+        description: errorMessage,
       });
     } finally {
       setIsSubmitting(false);
