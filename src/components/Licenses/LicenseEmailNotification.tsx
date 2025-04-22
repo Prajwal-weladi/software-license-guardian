@@ -12,10 +12,12 @@ interface LicenseEmailNotificationProps {
 
 const LicenseEmailNotification = ({ licenseId }: LicenseEmailNotificationProps) => {
   const [email, setEmail] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSubmitting(true);
     
     try {
       const { error } = await supabase
@@ -33,11 +35,14 @@ const LicenseEmailNotification = ({ licenseId }: LicenseEmailNotificationProps) 
       
       setEmail('');
     } catch (error) {
+      console.error('Error saving notification:', error);
       toast({
         variant: "destructive",
         title: "Error",
         description: "Failed to save email notification settings",
       });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -55,13 +60,14 @@ const LicenseEmailNotification = ({ licenseId }: LicenseEmailNotificationProps) 
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
+              disabled={isSubmitting}
             />
             <p className="text-xs text-muted-foreground">
               You'll receive notifications when this license is about to expire
             </p>
           </div>
-          <Button type="submit" className="w-full">
-            Save Notification Settings
+          <Button type="submit" className="w-full" disabled={isSubmitting}>
+            {isSubmitting ? 'Saving...' : 'Save Notification Settings'}
           </Button>
         </form>
       </CardContent>
