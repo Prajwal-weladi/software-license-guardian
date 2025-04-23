@@ -23,7 +23,7 @@ const Sidebar = () => {
     >
       <div className="flex items-center justify-between p-4 h-16 border-b border-sidebar-border">
         {!collapsed && (
-          <span className="font-bold text-xl">License<span className="text-primary">Guardian</span></span>
+          <span className="font-bold text-xl">License<span className="text-primary">Management</span></span>
         )}
         <Button 
           variant="ghost" 
@@ -55,11 +55,11 @@ const Sidebar = () => {
           collapsed ? "justify-center" : "space-x-3"
         )}>
           <div className="flex items-center justify-center h-8 w-8 rounded-full bg-primary text-white font-medium">
-            JD
+            PW
           </div>
           {!collapsed && (
             <div>
-              <p className="text-sm font-medium">John Doe</p>
+              <p className="text-sm font-medium">Prajwal Weladi</p>
               <p className="text-xs text-sidebar-foreground/70">Admin</p>
             </div>
           )}

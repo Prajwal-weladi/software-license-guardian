@@ -1,11 +1,15 @@
-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { licenses } from "@/data/mockData";
 import { formatCurrency } from "@/lib/utils";
 import { CalendarDays } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { License } from "@/data/mockData";
 
-const ExpiringLicenses = () => {
+interface ExpiringLicensesProps {
+  onSelectLicense?: (license: License) => void;
+}
+
+const ExpiringLicenses = ({ onSelectLicense }: ExpiringLicensesProps) => {
   // Get licenses expiring in the next 60 days
   const today = new Date();
   const expiringLicenses = licenses
@@ -53,7 +57,11 @@ const ExpiringLicenses = () => {
               );
               
               return (
-                <div key={license.id} className="flex items-center justify-between">
+                <div 
+                  key={license.id} 
+                  className="flex items-center justify-between p-2 rounded cursor-pointer hover:bg-muted/50"
+                  onClick={() => onSelectLicense && onSelectLicense(license)}
+                >
                   <div className="space-y-1">
                     <p className="text-sm font-medium leading-none">{license.name}</p>
                     <div className="flex items-center text-xs text-muted-foreground gap-2">

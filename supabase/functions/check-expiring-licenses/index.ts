@@ -1,10 +1,41 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
-import { Resend } from "npm:resend@2.0.0";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+}
+
+// Function to send email using EmailJS via their REST API
+async function sendEmailWithEmailJS(templateParams) {
+  const serviceId = "service_ccr2vb2";
+  const templateId = "template_rm0shl1";
+  const publicKey = "BnPNSRI9vhiqPLdSX";
+  
+  try {
+    const response = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        service_id: serviceId,
+        template_id: templateId,
+        user_id: publicKey,
+        template_params: templateParams
+      }),
+    });
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`EmailJS API error: ${errorText}`);
+    }
+    
+    return { success: true };
+  } catch (error) {
+    console.error('EmailJS send error:', error);
+    throw error;
+  }
 }
 
 serve(async (req) => {
@@ -18,20 +49,16 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_ANON_KEY') ?? ''
     )
 
-    const resend = new Resend(Deno.env.get('RESEND_API_KEY'));
-
     const body = await req.json();
 
     if (body.testEmail) {
-      const testEmailResponse = await resend.emails.send({
-        from: 'notifications@yourdomain.com',
-        to: 'test@example.com',
-        subject: 'Test Email from License Management System',
-        html: `
-          <h1>Email Service Test</h1>
-          <p>This is a test email from your License Management System.</p>
-          <p>If you're seeing this, your email configuration is working correctly!</p>
-        `
+      // Send test email using EmailJS
+      const testEmailResponse = await sendEmailWithEmailJS({
+        from_name: "License Management System",
+        to_name: "User",
+        to_email: "prajwalweladi1@gmail.com",
+        subject: "Test Email from License Management System",
+        message: "This is a test email from your License Management System. If you're seeing this, your email configuration is working correctly!"
       });
 
       return new Response(
@@ -61,28 +88,22 @@ serve(async (req) => {
     for (const license of expiringLicenses) {
       if (license.license_notifications) {
         for (const notification of license.license_notifications) {
-          await fetch('https://api.resend.com/emails', {
-            method: 'POST',
-            headers: {
-              'Authorization': `Bearer ${Deno.env.get('RESEND_API_KEY')}`,
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              from: 'notifications@yourdomain.com',
-              to: notification.email,
-              subject: `License Expiring Soon: ${license.name}`,
-              html: `
-                <h2>License Expiration Notice</h2>
-                <p>The following license will expire in 5 days:</p>
-                <ul>
-                  <li>License: ${license.name}</li>
-                  <li>Vendor: ${license.vendor}</li>
-                  <li>Expiry Date: ${new Date(license.expiry_date).toLocaleDateString()}</li>
-                </ul>
-                <p>Please take necessary action to renew the license if needed.</p>
-              `,
-            }),
-          })
+          // Send expiration notice via EmailJS
+          await sendEmailWithEmailJS({
+            from_name: "License Management System",
+            to_name: "User",
+            to_email: notification.email,
+            subject: `License Expiring Soon: ${license.name}`,
+            message: `
+              The following license will expire in 5 days:
+              
+              License: ${license.name}
+              Vendor: ${license.vendor}
+              Expiry Date: ${new Date(license.expiry_date).toLocaleDateString()}
+              
+              Please take necessary action to renew the license if needed.
+            `
+          });
         }
       }
     }

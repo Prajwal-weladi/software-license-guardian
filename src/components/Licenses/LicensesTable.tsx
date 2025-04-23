@@ -1,6 +1,5 @@
-
 import { useState } from "react";
-import { licenses } from "@/data/mockData";
+import { License } from "@/data/mockData";
 import { formatCurrency, formatDate, calculateDaysRemaining, getStatusColor } from "@/lib/utils";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
@@ -16,10 +15,11 @@ import {
 import { Info, Search, FileText } from "lucide-react";
 
 interface LicensesTableProps {
-  onSelectLicense: (license: any) => void;
+  licenses: License[];
+  onSelectLicense: (license: License) => void;
 }
 
-const LicensesTable = ({ onSelectLicense }: LicensesTableProps) => {
+const LicensesTable = ({ licenses, onSelectLicense }: LicensesTableProps) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [departmentFilter, setDepartmentFilter] = useState("all");

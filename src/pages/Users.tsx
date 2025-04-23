@@ -1,76 +1,70 @@
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import DashboardLayout from "@/components/Layout/DashboardLayout";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, Plus, User } from "lucide-react";
-
-// Mock user data with license assignments
-const mockUsers = [
-  { 
-    id: 1, 
-    name: "John Doe", 
-    email: "john.doe@example.com", 
-    department: "Engineering", 
-    assignedLicenses: [
-      { id: 1, name: "Visual Studio Enterprise", status: "active" },
-      { id: 2, name: "GitHub Enterprise", status: "active" }
-    ]
-  },
-  { 
-    id: 2, 
-    name: "Jane Smith", 
-    email: "jane.smith@example.com", 
-    department: "Marketing", 
-    assignedLicenses: [
-      { id: 3, name: "Adobe Creative Cloud", status: "active" },
-      { id: 4, name: "Figma Professional", status: "active" }
-    ]
-  },
-  { 
-    id: 3, 
-    name: "Robert Johnson", 
-    email: "robert.johnson@example.com", 
-    department: "Sales", 
-    assignedLicenses: [
-      { id: 5, name: "Salesforce Enterprise", status: "active" },
-      { id: 6, name: "Zoom Business", status: "active" }
-    ]
-  },
-  { 
-    id: 4, 
-    name: "Emily Davis", 
-    email: "emily.davis@example.com", 
-    department: "HR", 
-    assignedLicenses: [
-      { id: 7, name: "Workday HCM", status: "active" },
-      { id: 8, name: "Microsoft 365 E3", status: "active" }
-    ]
-  },
-  { 
-    id: 5, 
-    name: "Michael Wilson", 
-    email: "michael.wilson@example.com", 
-    department: "IT", 
-    assignedLicenses: [
-      { id: 9, name: "AWS Enterprise Support", status: "active" },
-      { id: 10, name: "Microsoft 365 E5", status: "active" }
-    ]
-  }
-];
+import { Search, User, Trash2, Edit } from "lucide-react";
+import AddUserDialog from "@/components/Users/AddUserDialog";
+import AssignLicenseDialog from "@/components/Users/AssignLicenseDialog";
+import { getUsers, deleteUser, updateLicenseSeats } from "@/services/dataService"; // Updated imports
+import { useToast } from "@/hooks/use-toast";
 
 const Users = () => {
   const [searchQuery, setSearchQuery] = useState("");
+  const [users, setUsers] = useState<any[]>([]);
+  const [selectedUser, setSelectedUser] = useState<any>(null);
+  const [isAssignDialogOpen, setIsAssignDialogOpen] = useState(false);
+  const [refreshTrigger, setRefreshTrigger] = useState(0); // Add refresh trigger
+  const { toast } = useToast();
+  
+  // Load users when component mounts or refresh is triggered
+  useEffect(() => {
+    loadUsers();
+  }, [refreshTrigger]);
+  
+  // Load users from the data service
+  const loadUsers = () => {
+    const loadedUsers = getUsers();
+    setUsers(loadedUsers);
+  };
   
   // Filter users based on search
-  const filteredUsers = mockUsers.filter(user => 
+  const filteredUsers = users.filter(user => 
     user.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
     user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
     user.department.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  // Handle adding a new user
+  const handleUserAdded = (newUser: any) => {
+    // Refresh the users list
+    setRefreshTrigger(prev => prev + 1);
+  };
+
+  // Open assign license dialog for a user
+  const handleManageClick = (user: any) => {
+    setSelectedUser(user);
+    setIsAssignDialogOpen(true);
+  };
+
+  // Handle deleting a user
+  const handleDeleteUser = (userId: number) => {
+    deleteUser(userId);
+    updateLicenseSeats(); // Update license seat counts
+    setRefreshTrigger(prev => prev + 1); // Refresh the users list
+    
+    toast({
+      title: "User Deleted",
+      description: "The user has been removed from the system.",
+    });
+  };
+
+  // Handle license assignments updated
+  const handleLicensesUpdated = () => {
+    setRefreshTrigger(prev => prev + 1); // Refresh the users list
+  };
 
   return (
     <DashboardLayout>
@@ -82,10 +76,7 @@ const Users = () => {
           </p>
         </div>
         
-        <Button size="sm" className="mt-4 sm:mt-0">
-          <Plus className="mr-2 h-4 w-4" />
-          Add User
-        </Button>
+        <AddUserDialog onUserAdded={handleUserAdded} />
       </div>
       
       <Card>
@@ -121,36 +112,83 @@ const Users = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredUsers.map(user => (
-                <TableRow key={user.id}>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      <div className="bg-muted h-8 w-8 rounded-full flex items-center justify-center">
-                        <User className="h-4 w-4 text-muted-foreground" />
+              {filteredUsers.length > 0 ? (
+                filteredUsers.map(user => (
+                  <TableRow key={user.id}>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <div className="bg-muted h-8 w-8 rounded-full flex items-center justify-center">
+                          <User className="h-4 w-4 text-muted-foreground" />
+                        </div>
+                        <span className="font-medium">{user.name}</span>
                       </div>
-                      <span className="font-medium">{user.name}</span>
-                    </div>
-                  </TableCell>
-                  <TableCell>{user.email}</TableCell>
-                  <TableCell>{user.department}</TableCell>
-                  <TableCell>
-                    <div className="flex flex-wrap gap-1">
-                      {user.assignedLicenses.map(license => (
-                        <Badge key={license.id} variant="outline" className="text-xs">
-                          {license.name}
-                        </Badge>
-                      ))}
-                    </div>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <Button variant="ghost" size="sm">Manage</Button>
+                    </TableCell>
+                    <TableCell>{user.email}</TableCell>
+                    <TableCell>{user.department}</TableCell>
+                    <TableCell>
+                      <div className="flex flex-wrap gap-1">
+                        {user.assignedLicenses.length > 0 ? (
+                          user.assignedLicenses.map((license: any) => (
+                            <Badge 
+                              key={license.id} 
+                              variant="outline" 
+                              className={`text-xs ${
+                                license.status === 'expired' ? 'text-destructive border-destructive/30' :
+                                license.status === 'expiring' ? 'text-license-warning border-license-warning/30' :
+                                'text-license-valid border-license-valid/30'
+                              }`}
+                            >
+                              {license.name}
+                            </Badge>
+                          ))
+                        ) : (
+                          <span className="text-xs text-muted-foreground">No licenses</span>
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex justify-end gap-2">
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={() => handleManageClick(user)}
+                        >
+                          <Edit className="h-4 w-4 mr-1" />
+                          Manage
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          className="text-destructive"
+                          onClick={() => handleDeleteUser(user.id)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={5} className="h-24 text-center">
+                    No users found.
                   </TableCell>
                 </TableRow>
-              ))}
+              )}
             </TableBody>
           </Table>
         </CardContent>
       </Card>
+
+      {/* Dialog for assigning licenses */}
+      {selectedUser && (
+        <AssignLicenseDialog
+          open={isAssignDialogOpen}
+          onOpenChange={setIsAssignDialogOpen}
+          user={selectedUser}
+          onLicensesUpdated={handleLicensesUpdated}
+        />
+      )}
     </DashboardLayout>
   );
 };

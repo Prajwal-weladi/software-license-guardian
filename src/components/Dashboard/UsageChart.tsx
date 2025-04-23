@@ -1,9 +1,13 @@
-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { usageData } from "@/data/mockData";
+import { License } from "@/data/mockData";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
-const UsageChart = () => {
+interface UsageChartProps {
+  selectedLicense?: License | null;
+}
+
+const UsageChart = ({ selectedLicense }: UsageChartProps) => {
   // Get data for the chart (last 14 days)
   const chartData = usageData.slice(-14);
   
@@ -16,17 +20,30 @@ const UsageChart = () => {
     })
   }));
 
+  // If we have a selected license, simulate usage data specific to this license
+  // In a real app, you would have actual per-license usage data
+  const licenseSpecificData = selectedLicense 
+    ? formattedData.map(data => ({
+        ...data,
+        users: Math.round(data.users * (selectedLicense.usedSeats / 100)) // Simulate license-specific usage
+      }))
+    : formattedData;
+
   return (
     <Card>
       <CardHeader>
         <CardTitle>Software Usage</CardTitle>
-        <CardDescription>Daily active users over the last 14 days</CardDescription>
+        <CardDescription>
+          {selectedLicense 
+            ? `Daily active users for ${selectedLicense.name}`
+            : 'Daily active users over the last 14 days'}
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <div className="h-[300px]">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart
-              data={formattedData}
+              data={licenseSpecificData}
               margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
             >
               <defs>

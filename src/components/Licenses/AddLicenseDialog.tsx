@@ -1,7 +1,6 @@
-
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { licenses } from "@/data/mockData";
+import { addLicense } from "@/services/dataService";
 import { 
   Dialog, 
   DialogContent, 
@@ -69,7 +68,7 @@ const AddLicenseDialog = ({ open, onOpenChange }: AddLicenseDialogProps) => {
     
     // Create new license object
     const newLicense = {
-      id: `license-${Date.now()}`,
+      id: String(Date.now()),
       name: formData.name,
       vendor: formData.vendor,
       type: licenseType,
@@ -83,8 +82,8 @@ const AddLicenseDialog = ({ open, onOpenChange }: AddLicenseDialogProps) => {
       tags: [], // Add empty tags array to match the License interface
     };
     
-    // Add to the licenses array
-    licenses.unshift(newLicense);
+    // Add the new license using the data service
+    addLicense(newLicense);
     
     toast({
       title: "License added",

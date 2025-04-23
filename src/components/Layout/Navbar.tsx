@@ -8,7 +8,7 @@ const Navbar = () => {
     <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background px-6">
       <div className="flex flex-1 items-center gap-4 md:gap-6">
         <div className="hidden md:flex">
-          <span className="font-semibold text-xl text-primary">LicenseGuardian</span>
+          <span className="font-semibold text-xl text-primary">LicenseManagement</span>
         </div>
         <form className="flex-1 md:max-w-sm lg:max-w-md">
           <div className="relative">

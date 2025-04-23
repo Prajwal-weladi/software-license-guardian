@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -9,9 +8,11 @@ import { CalendarDays, Info, Users } from "lucide-react";
 
 interface LicenseCardProps {
   license: License;
+  onSelectLicense?: (license: License) => void;
+  isSelected?: boolean;
 }
 
-const LicenseCard = ({ license }: LicenseCardProps) => {
+const LicenseCard = ({ license, onSelectLicense, isSelected = false }: LicenseCardProps) => {
   const usagePercentage = Math.round((license.usedSeats / license.seats) * 100);
   
   const getStatusColor = (status: string) => {
@@ -49,7 +50,14 @@ const LicenseCard = ({ license }: LicenseCardProps) => {
   };
 
   return (
-    <Card className="license-card overflow-hidden">
+    <Card 
+      className={`license-card overflow-hidden cursor-pointer transition-all ${
+        isSelected 
+          ? 'ring-2 ring-primary/50 shadow-md transform scale-[1.02]' 
+          : 'hover:shadow-md hover:scale-[1.01]'
+      }`}
+      onClick={() => onSelectLicense && onSelectLicense(license)}
+    >
       <CardContent className="p-6">
         <div className="flex justify-between items-start mb-4">
           <div>

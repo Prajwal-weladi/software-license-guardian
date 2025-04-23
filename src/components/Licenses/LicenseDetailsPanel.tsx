@@ -11,6 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { formatCurrency, formatDate, calculateDaysRemaining } from "@/lib/utils";
 import { X, Calendar, Users, Book, Edit, FileText, Archive } from "lucide-react";
 import LicenseEmailNotification from './LicenseEmailNotification';
+import emailjs from '@emailjs/browser';
 
 interface LicenseDetailsPanelProps {
   license: License | null;
@@ -57,14 +58,26 @@ const LicenseDetailsPanel = ({ license, onClose }: LicenseDetailsPanelProps) => 
 
     setIsSending(true);
     try {
-      const { data, error } = await supabase.functions.invoke('check-expiring-licenses', {
-        body: JSON.stringify({
-          testEmail: true,
-          licenseId: license.id
-        })
-      });
+      const templateParams = {
+        from_name: "License Management System",
+        to_name: "User",
+        to_email: "prajwalweladi1@gmail.com",
+        subject: `Test Email for License: ${license.name}`,
+        message: `
+          This is a test email for license: ${license.name}
+          Vendor: ${license.vendor}
+          Expiry Date: ${formatDate(license.expiryDate)}
+          
+          If you're seeing this, your email configuration is working correctly!
+        `
+      };
 
-      if (error) throw error;
+      await emailjs.send(
+        "service_ccr2vb2",  // Updated Service ID
+        "template_rm0shl1", // Updated Template ID
+        templateParams,
+        "BnPNSRI9vhiqPLdSX" // Updated Public Key
+      );
 
       toast({
         title: "Email Test Successful",
