@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -40,6 +40,39 @@ const DocumentViewDialog = ({
   const [selectedDocumentId, setSelectedDocumentId] = useState<string | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+
+  // Debug: Log license documents when dialog opens
+  useEffect(() => {
+    if (open && license) {
+      console.log("DocumentViewDialog opened with license:", license.name);
+      console.log("Documents available:", license.documents?.length || 0);
+      if (license.documents && license.documents.length > 0) {
+        console.log("First document:", license.documents[0]);
+        console.log("First document dataUrl exists:", !!license.documents[0].dataUrl);
+        console.log("First document dataUrl length:", license.documents[0].dataUrl?.length || 0);
+
+        // Auto-select the first document when dialog opens
+        if (!selectedDocumentId && license.documents.length > 0) {
+          const firstDoc = license.documents[0];
+          console.log("Auto-selecting first document:", firstDoc.name);
+          // We'll set the ID and URL directly instead of calling handlePreview to avoid the dependency issue
+          setSelectedDocumentId(firstDoc.id);
+          if (firstDoc.dataUrl) {
+            setPreviewUrl(firstDoc.dataUrl);
+            console.log("Preview URL set for document:", firstDoc.name);
+          }
+        }
+      }
+    }
+  }, [open, license]);
+
+  // Reset state when dialog closes
+  useEffect(() => {
+    if (!open) {
+      setSelectedDocumentId(null);
+      setPreviewUrl(null);
+    }
+  }, [open]);
 
   // Handle document preview
   const handlePreview = (documentId: string) => {
@@ -337,12 +370,27 @@ const DocumentViewDialog = ({
         </div>
 
         <DialogFooter>
-          <Button
-            type="button"
-            onClick={() => onOpenChange(false)}
-          >
-            Close
-          </Button>
+          <div className="flex gap-2 w-full justify-between">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                // Refresh the document data
+                if (selectedDocumentId) {
+                  console.log("Refreshing document view for:", selectedDocumentId);
+                  handlePreview(selectedDocumentId);
+                }
+              }}
+            >
+              Refresh
+            </Button>
+            <Button
+              type="button"
+              onClick={() => onOpenChange(false)}
+            >
+              Close
+            </Button>
+          </div>
         </DialogFooter>
       </DialogContent>
     </Dialog>

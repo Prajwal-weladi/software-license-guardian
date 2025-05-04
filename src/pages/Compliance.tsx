@@ -47,21 +47,52 @@ const Compliance = () => {
 
   // Handle opening the view dialog
   const handleViewClick = (license: License) => {
-    setSelectedLicense(license);
+    // Get the most up-to-date version of the license
+    const currentLicenses = getLicenses();
+    const currentLicense = currentLicenses.find(lic => lic.id === license.id);
+
+    console.log("Opening view dialog for license:", license.name);
+    console.log("License has documents:", license.documents?.length || 0);
+
+    if (currentLicense) {
+      console.log("Found current license with documents:", currentLicense.documents?.length || 0);
+      setSelectedLicense(currentLicense);
+    } else {
+      console.log("Using provided license");
+      setSelectedLicense(license);
+    }
+
     setIsViewDialogOpen(true);
   };
 
   // Handle document upload completion
   const handleDocumentUploaded = () => {
+    console.log("Document uploaded, refreshing data");
+
     // Refresh the licenses list
     setRefreshTrigger(prev => prev + 1);
 
     // If we have a selected license, refresh it with the updated data
     if (selectedLicense) {
+      console.log("Refreshing selected license:", selectedLicense.name);
+
+      // Get fresh data from localStorage
       const updatedLicenses = getLicenses();
       const updatedLicense = updatedLicenses.find(lic => lic.id === selectedLicense.id);
+
       if (updatedLicense) {
+        console.log("Found updated license with documents:", updatedLicense.documents?.length || 0);
+
+        // Update the selected license with the fresh data
         setSelectedLicense(updatedLicense);
+
+        // If the view dialog is open, we might want to show the document that was just uploaded
+        if (isViewDialogOpen && updatedLicense.documents && updatedLicense.documents.length > 0) {
+          console.log("View dialog is open, latest document:",
+            updatedLicense.documents[updatedLicense.documents.length - 1].name);
+        }
+      } else {
+        console.log("Could not find updated license");
       }
     }
   };
@@ -77,10 +108,10 @@ const Compliance = () => {
   };
 
   // Get badge variant based on compliance status
-  const getComplianceBadgeVariant = (status: string) => {
+  const getComplianceBadgeVariant = (status: string): "default" | "destructive" | "outline" | "secondary" => {
     switch (status) {
       case "compliant":
-        return "success";
+        return "secondary"; // Using secondary instead of success as it's not in the allowed variants
       case "non-compliant":
         return "destructive";
       default:

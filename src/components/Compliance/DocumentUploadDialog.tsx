@@ -187,14 +187,20 @@ const DocumentUploadDialog = ({
 
       // Create a document object to save (without the file property which can't be serialized)
       const newDocument = {
-        id: document.id,
+        id: document.id || Date.now().toString(), // Ensure we have an ID
         name: document.name,
         description: document.description,
         type: document.type,
         size: document.size,
-        uploadDate: document.uploadDate,
+        uploadDate: document.uploadDate || new Date().toISOString(),
         dataUrl: document.dataUrl
       };
+
+      // Double-check that dataUrl is set
+      if (!newDocument.dataUrl) {
+        console.error("dataUrl is missing in the document object");
+        throw new Error("Document data is missing");
+      }
 
       console.log("Document prepared for saving:", newDocument.name, "Type:", newDocument.type);
 
@@ -220,6 +226,15 @@ const DocumentUploadDialog = ({
       // Save the updated licenses
       saveLicenses(licenses);
       console.log("Licenses saved to localStorage");
+
+      // Debug: Verify the document was saved correctly
+      const savedLicenses = getLicenses();
+      const savedLicense = savedLicenses.find(lic => lic.id === license.id);
+      const savedDocument = savedLicense?.documents?.find(doc => doc.id === newDocument.id);
+
+      console.log("Verification - Document saved:", !!savedDocument);
+      console.log("Verification - Document has dataUrl:", !!savedDocument?.dataUrl);
+      console.log("Verification - Document dataUrl length:", savedDocument?.dataUrl?.length || 0);
 
       // Call the callback to refresh the UI
       onDocumentUploaded();
