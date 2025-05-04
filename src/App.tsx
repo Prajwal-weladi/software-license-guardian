@@ -1,32 +1,55 @@
-
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider } from './contexts/AuthContext';
+import ProtectedRoute from './components/ProtectedRoute';
+import Login from './pages/auth/Login';
+import Signup from './pages/auth/Signup';
+import ConfirmEmail from './pages/auth/ConfirmEmail';
+import AdminDashboard from './pages/admin/Dashboard';
+import EmployerLicenses from './pages/employer/Licenses';
+import Licenses from './pages/Licenses';
+import Users from './pages/Users';
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Index from "./pages/Index";
-import Licenses from "./pages/Licenses"; 
-import Users from "./pages/Users";
-import NotFound from "./pages/NotFound";
+import UpdateRole from './components/UpdateRole';
 
 const queryClient = new QueryClient();
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/licenses" element={<Licenses />} />
-          <Route path="/users" element={<Users />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+function App() {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <AuthProvider>
+          <Router>
+            <Routes>
+              <Route path="/" element={<AdminDashboard />} />
+              <Route path="/admin/*" element={<AdminDashboard />} />
+              <Route path="/admin/dashboard" element={<AdminDashboard />} />
+              <Route path="/Dasboard" element={<AdminDashboard />} />
+              <Route path="/dashboard" element={<AdminDashboard />} />
+              
+              {/* Add routes for licenses and users */}
+              <Route path="/licenses" element={<Licenses />} />
+              <Route path="/users" element={<Users />} />
+              
+              {/* Keep other routes for reference */}
+              <Route path="/signup" element={<Signup />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/confirm-email" element={<ConfirmEmail />} />
+              <Route path="/update-role" element={<UpdateRole />} />
+              <Route path="/employer/*" element={<EmployerLicenses />} />
+              
+              {/* Catch all route - redirect to dashboard */}
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          </Router>
+        </AuthProvider>
+      </TooltipProvider>
+    </QueryClientProvider>
+  );
+}
 
 export default App;

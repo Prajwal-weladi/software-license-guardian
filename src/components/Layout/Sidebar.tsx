@@ -3,16 +3,27 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import {
-  BarChart, Database, User, Calendar, Settings, Shield, 
+  BarChart, Database, User, Calendar, Settings, Shield,
   ChevronLeft, ChevronRight
 } from "lucide-react";
+import { Link, useLocation } from "react-router-dom";
 
 const Sidebar = () => {
   const [collapsed, setCollapsed] = useState(false);
+  const location = useLocation();
 
   const toggleSidebar = () => {
     setCollapsed(!collapsed);
   };
+
+  const navItems = [
+    { name: "Dashboard", href: "/", icon: <BarChart /> },
+    { name: "Licenses", href: "/licenses", icon: <Database /> },
+    { name: "Users", href: "/users", icon: <User /> },
+    { name: "Renewals", href: "/renewals", icon: <Calendar /> },
+    { name: "Compliance", href: "/compliance", icon: <Shield /> },
+    { name: "Settings", href: "/settings", icon: <Settings /> }
+  ];
 
   return (
     <div
@@ -25,9 +36,9 @@ const Sidebar = () => {
         {!collapsed && (
           <span className="font-bold text-xl">License<span className="text-primary">Management</span></span>
         )}
-        <Button 
-          variant="ghost" 
-          size="icon" 
+        <Button
+          variant="ghost"
+          size="icon"
           onClick={toggleSidebar}
           className={cn(
             "text-sidebar-foreground hover:text-white hover:bg-sidebar-accent",
@@ -40,12 +51,20 @@ const Sidebar = () => {
 
       <div className="flex flex-col flex-1 py-4 overflow-y-auto">
         <nav className="space-y-1 px-2">
-          <SidebarItem icon={<BarChart />} text="Dashboard" active collapsed={collapsed} />
-          <SidebarItem icon={<Database />} text="Licenses" collapsed={collapsed} />
-          <SidebarItem icon={<User />} text="Users" collapsed={collapsed} />
-          <SidebarItem icon={<Calendar />} text="Renewals" collapsed={collapsed} />
-          <SidebarItem icon={<Shield />} text="Compliance" collapsed={collapsed} />
-          <SidebarItem icon={<Settings />} text="Settings" collapsed={collapsed} />
+          {navItems.map((item) => {
+            const isActive = location.pathname === item.href ||
+                            (item.href === "/" && (location.pathname === "/dashboard" || location.pathname === "/admin/dashboard"));
+            return (
+              <SidebarItem
+                key={item.name}
+                icon={item.icon}
+                text={item.name}
+                href={item.href}
+                active={isActive}
+                collapsed={collapsed}
+              />
+            );
+          })}
         </nav>
       </div>
 
@@ -72,11 +91,12 @@ const Sidebar = () => {
 interface SidebarItemProps {
   icon: React.ReactNode;
   text: string;
+  href: string;
   active?: boolean;
   collapsed: boolean;
 }
 
-const SidebarItem = ({ icon, text, active = false, collapsed }: SidebarItemProps) => {
+const SidebarItem = ({ icon, text, href, active = false, collapsed }: SidebarItemProps) => {
   return (
     <Button
       variant="ghost"
@@ -85,9 +105,12 @@ const SidebarItem = ({ icon, text, active = false, collapsed }: SidebarItemProps
         active ? "bg-sidebar-accent text-sidebar-accent-foreground" : "text-sidebar-foreground",
         collapsed ? "px-2" : "px-3"
       )}
+      asChild
     >
-      <span className={collapsed ? "mx-auto" : "mr-2"}>{icon}</span>
-      {!collapsed && <span>{text}</span>}
+      <Link to={href}>
+        <span className={collapsed ? "mx-auto" : "mr-2"}>{icon}</span>
+        {!collapsed && <span>{text}</span>}
+      </Link>
     </Button>
   );
 };
