@@ -1,18 +1,18 @@
 
-import { Bell, Search, Settings, User } from "lucide-react";
+import { Bell, Settings, LogIn, UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
+import SearchResultsSimple from "@/components/Search/SearchResultsSimple";
 
 const Navbar = () => {
   const location = useLocation();
+  // Simplified for demo - always authenticated
+  const isAuthenticated = true;
 
   const navItems = [
     { name: "Dashboard", href: "/" },
-    { name: "Licenses", href: "/licenses" },
-    { name: "Reports", href: "/reports" },
-    { name: "Settings", href: "/settings" }
+    { name: "Licenses", href: "/licenses" }
   ];
 
   return (
@@ -21,16 +21,9 @@ const Navbar = () => {
         <div className="hidden md:flex">
           <span className="font-semibold text-xl text-primary">LicenseManagement</span>
         </div>
-        <form className="flex-1 md:max-w-sm lg:max-w-md">
-          <div className="relative">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              type="search"
-              placeholder="Search licenses, vendors..."
-              className="w-full rounded-lg pl-8 bg-background"
-            />
-          </div>
-        </form>
+        <div className="flex-1 md:max-w-sm lg:max-w-md">
+          <SearchResultsSimple />
+        </div>
         <nav className="flex-1 hidden md:flex justify-end">
           {navItems.map((item) => {
             const isActive = location.pathname === item.href ||
@@ -52,29 +45,57 @@ const Navbar = () => {
         </nav>
       </div>
       <div className="flex items-center gap-2">
-        <Button variant="ghost" size="icon" className="relative">
-          <Bell className="h-5 w-5" />
-          <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-destructive"></span>
-        </Button>
-        <Button
-          variant="ghost"
-          size="icon"
-          asChild
-        >
-          <Link to="/settings">
-            <Settings className="h-5 w-5" />
-          </Link>
-        </Button>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="rounded-full"
-          asChild
-        >
-          <Link to="/profile">
-            <User className="h-5 w-5" />
-          </Link>
-        </Button>
+        {isAuthenticated ? (
+          <>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="relative"
+            >
+              <Bell className="h-5 w-5" />
+              <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-destructive"></span>
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              asChild
+            >
+              <Link to="/settings">
+                <Settings className="h-5 w-5" />
+              </Link>
+            </Button>
+            <Button
+              variant="ghost"
+              onClick={() => console.log('Logout clicked')}
+              className="text-sm font-medium"
+            >
+              Logout
+            </Button>
+          </>
+        ) : (
+          <>
+            <Button
+              variant="ghost"
+              asChild
+              className="text-sm font-medium"
+            >
+              <Link to="/login">
+                <LogIn className="mr-2 h-4 w-4" />
+                Login
+              </Link>
+            </Button>
+            <Button
+              variant="default"
+              asChild
+              className="text-sm font-medium"
+            >
+              <Link to="/signup">
+                <UserPlus className="mr-2 h-4 w-4" />
+                Sign Up
+              </Link>
+            </Button>
+          </>
+        )}
       </div>
     </header>
   );

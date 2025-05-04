@@ -20,9 +20,7 @@ const Sidebar = () => {
     { name: "Dashboard", href: "/", icon: <BarChart /> },
     { name: "Licenses", href: "/licenses", icon: <Database /> },
     { name: "Users", href: "/users", icon: <User /> },
-    { name: "Renewals", href: "/renewals", icon: <Calendar /> },
-    { name: "Compliance", href: "/compliance", icon: <Shield /> },
-    { name: "Settings", href: "/settings", icon: <Settings /> }
+    { name: "Compliance", href: "/compliance", icon: <Shield /> }
   ];
 
   return (

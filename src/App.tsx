@@ -7,7 +7,8 @@ import ConfirmEmail from './pages/auth/ConfirmEmail';
 import AdminDashboard from './pages/admin/Dashboard';
 import EmployerLicenses from './pages/employer/Licenses';
 import Licenses from './pages/Licenses';
-import Users from './pages/Users';
+import UsersSimple from './pages/UsersSimple';
+import Compliance from './pages/Compliance';
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -30,18 +31,19 @@ function App() {
               <Route path="/admin/dashboard" element={<AdminDashboard />} />
               <Route path="/Dasboard" element={<AdminDashboard />} />
               <Route path="/dashboard" element={<AdminDashboard />} />
-              
-              {/* Add routes for licenses and users */}
+
+              {/* Add routes for licenses, users, and compliance */}
               <Route path="/licenses" element={<Licenses />} />
-              <Route path="/users" element={<Users />} />
-              
+              <Route path="/users" element={<UsersSimple />} />
+              <Route path="/compliance" element={<Compliance />} />
+
               {/* Keep other routes for reference */}
               <Route path="/signup" element={<Signup />} />
               <Route path="/login" element={<Login />} />
               <Route path="/confirm-email" element={<ConfirmEmail />} />
               <Route path="/update-role" element={<UpdateRole />} />
               <Route path="/employer/*" element={<EmployerLicenses />} />
-              
+
               {/* Catch all route - redirect to dashboard */}
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>

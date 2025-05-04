@@ -1,5 +1,15 @@
 
 // Mock data for software licenses and usage
+export interface Document {
+  id: string;
+  name: string;
+  description: string;
+  type: string;
+  size: number;
+  uploadDate: string;
+  dataUrl?: string;
+}
+
 export interface License {
   id: string;
   name: string;
@@ -14,6 +24,7 @@ export interface License {
   lastUsed?: string;
   department: string;
   tags: string[];
+  documents?: Document[];
 }
 
 export interface UsageData {
@@ -179,28 +190,28 @@ export const licenses: License[] = [
 export const generateUsageData = (): UsageData[] => {
   const usageData: UsageData[] = [];
   const today = new Date();
-  
+
   for (let i = 30; i >= 0; i--) {
     const date = new Date();
     date.setDate(today.getDate() - i);
-    
+
     // Generate a somewhat realistic usage pattern with weekday/weekend differences
     const dayOfWeek = date.getDay();
     const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
-    
+
     // Base number of users (higher on weekdays, lower on weekends)
     let baseUsers = isWeekend ? 320 : 680;
-    
+
     // Add some randomness
     const randomFactor = Math.random() * 50 - 25;
     const users = Math.max(0, Math.round(baseUsers + randomFactor));
-    
+
     usageData.push({
       date: date.toISOString().split('T')[0],
       users,
     });
   }
-  
+
   return usageData;
 };
 
